@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower of Hanoi</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* h1 {
+            margin-top: 20px;
+            color: #333;
+        } */
+
+        h1{
+    
+            margin-top: 20px;
+            color: #fff;
+            text-shadow: 0 0 7px green;
+            /* cursor: pointer; */
+            transition: text-shadow 0.3, color 0.3s;
+        }
+        h1:hover{
+              color: #00ff00;
+              text-shadow: 0 0 5px black, 0 0 30px #00ff00;
+        }
+
+        #controls {
+            margin: 20px;
+        }
+
+        button{
+            padding: 10px 20px;
+            margin: 5px;
+            border:none;
+            border-radius: 15px;
+            background-color: black;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover
+        {
+            background-color: #45a049;
+        }
+
+        #game-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            padding: 20px;
+            width: 90%;
+            max-width: 1200px;
+        }
+        #gameContainer
+        {
+            box-shadow: 0 0 15px green;
+            border: 2px solid green;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .stand {
+            position: relative;
+            display: flex;
+            flex-direction: column-reverse;
+            align-items: center;
+            justify-content: flex-start;
+            width: 120px;
+            height: 300px;
+            background-color: #d4d4d4;
+            border-radius: 8px;
+            border: 2px solid #333;
+        }
+
+        .rod {
+            position: absolute;
+            top: 0;
+            width: 8px;
+            height: 100%;
+            background-color: #333;
+        }
+
+        .disk {
+            margin-bottom: 5px;
+            background-color: steelblue;
+            border-radius: 4px;
+            cursor: grab;
+            transition: transform 0.2s;
+        }
+
+        .disk:active {
+            cursor: grabbing;
+        }
+
+        #message {
+            margin-top: 10px;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tower of Hanoi</h1>
+    <div id="controls">
+        <button onclick="startLevel(1)">Start Level 1 (3 Disks)</button>
+        <button onclick="startLevel(2)">Start Level 2 (4 Disks)</button>
+        <button onclick="startLevel(3)">Start Level 3 (5 Disks)</button>
+    </div>
+
+    <div id="message"></div>
+    <div id="game-container"></div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const message = document.getElementById('message');
+        let currentLevel = 1;
+        let draggedDisk = null;
+
+        function createStand(id) {
+            const stand = document.createElement('div');
+            stand.classList.add('stand');
+            stand.id = id;
+
+            const rod = document.createElement('div');
+            rod.classList.add('rod');
+            stand.appendChild(rod);
+
+            stand.addEventListener('dragover', (e) => e.preventDefault());
+            stand.addEventListener('drop', dropDisk);
+            return stand;
+        }
+
+        function createDisk(size) {
+            const disk = document.createElement('div');
+            disk.classList.add('disk');
+            disk.style.width = `${size * 30}px`; // eg 3 * 30 = 90px
+            disk.style.height = '20px';
+            disk.dataset.size = size;
+            disk.draggable = true;
+
+            disk.addEventListener('dragstart', dragDisk);
+            return disk;
+        }
+
+        function startLevel(level) {
+            gameContainer.innerHTML = '';
+            currentLevel = level;
+            let numDisks = 2 + level; // Level 1 -> 3 disks, Level 2 -> 4 disks, Level 3 -> 5 disks
+
+            message.textContent = `  Move all disks from Stand A to 🚶‍♂️‍➡️ Stand C.`;
+
+            ['A', 'B', 'C'].forEach(standId => {
+                gameContainer.appendChild(createStand(standId));
+            });
+
+            const standA = document.getElementById('A');
+            for (let i = numDisks; i >= 1; i--) {
+                standA.appendChild(createDisk(i));
+            }
+        }
+
+        function dragDisk(e) {
+            draggedDisk = e.target;
+        }
+
+        function dropDisk(e) {
+            const stand = e.target.closest('.stand');
+            if (stand) {
+                const disks = stand.querySelectorAll('.disk');
+                const topDisk = disks[disks.length - 1];
+
+                if (!topDisk || parseInt(draggedDisk.dataset.size) < parseInt(topDisk.dataset.size)) {
+                    stand.appendChild(draggedDisk);
+                    checkWin();
+                } else {
+                    alert('Invalid move! You cannot place a larger disk on a smaller disk.');
+                }
+            }
+        }
+
+        function checkWin() {
+            const standC = document.getElementById('C');
+            const numDisks = 2 + currentLevel;
+            if (standC.children.length === numDisks + 1) {
+                message.textContent = `🎉 Congratulations! You completed Level ${currentLevel}.`;
+            }
+        }
+
+        startLevel(1);
+    </script>
+</body>
+</html>
